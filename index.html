@@ -1,0 +1,127 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>사진대장</title>
+  <link rel="stylesheet" href="photo-ledger.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <p class="eyebrow">Photo Ledger</p>
+      <h1>사진대장</h1>
+    </div>
+    <div class="header-actions">
+      <button id="printBtn" type="button">PDF 인쇄/저장</button>
+      <button id="exportCsvBtn" type="button">CSV</button>
+      <button id="exportJsonBtn" type="button">저장</button>
+      <button id="saveAsJsonBtn" type="button">다른이름으로 저장</button>
+      <label class="file-button">
+        불러오기
+        <input id="importJsonInput" type="file" accept=".json,application/json" />
+      </label>
+    </div>
+  </header>
+
+  <main class="app-shell">
+    <section class="panel project-panel" aria-label="대장 기본 정보">
+      <label>
+        현장명
+        <input id="projectName" type="text" placeholder="예: 오라동 현장" />
+      </label>
+      <label>
+        작성일
+        <input id="reportDate" type="date" />
+      </label>
+      <label>
+        작성자
+        <input id="authorName" type="text" placeholder="예: 에릭" />
+      </label>
+      <label>
+        비고
+        <input id="projectMemo" type="text" placeholder="공종, 구역, 특이사항" />
+      </label>
+    </section>
+
+    <section class="upload-panel" aria-label="사진 추가">
+      <div>
+        <h2>사진 추가</h2>
+        <p>여러 장을 한 번에 올려도 됩니다. 올린 뒤 위치와 내용을 적으면 엑셀 사진대장처럼 정리됩니다.</p>
+      </div>
+      <label class="upload-box" id="dropZone">
+        <span>사진 선택 또는 끌어놓기</span>
+        <small>JPG, PNG, WebP</small>
+        <input id="photoInput" type="file" accept="image/*" multiple />
+      </label>
+    </section>
+
+    <section class="toolbar" aria-label="대장 도구">
+      <div class="counter">
+        <strong id="photoCount">0</strong>
+        <span>장</span>
+      </div>
+      <label class="search-field">
+        검색
+        <input id="searchInput" type="search" placeholder="위치, 내용, 비고 검색" />
+      </label>
+      <button id="addBlankBtn" type="button">빈 항목 추가</button>
+      <button id="clearBtn" class="danger" type="button">전체 비우기</button>
+    </section>
+
+    <section class="ledger" aria-label="사진 목록">
+      <div class="ledger-head">
+        <span>No.</span>
+        <span>사진</span>
+        <span>공종</span>
+        <span>위치</span>
+        <span>내용</span>
+        <span>일자</span>
+        <span></span>
+      </div>
+      <div id="ledgerList" class="ledger-list"></div>
+      <div id="emptyState" class="empty-state">
+        <strong>아직 사진이 없습니다.</strong>
+        <span>위의 사진 추가 버튼으로 첫 사진을 올려보세요.</span>
+      </div>
+    </section>
+  </main>
+
+  <div id="printPreview" class="print-preview" aria-hidden="true"></div>
+
+  <template id="rowTemplate">
+    <article class="ledger-row">
+      <div class="row-number"></div>
+      <label class="photo-cell">
+        <img alt="" />
+        <span>사진 변경</span>
+        <input class="replace-photo" type="file" accept="image/*" />
+      </label>
+      <div class="print-field" data-label="공종">
+        <textarea class="field memo" rows="3" placeholder="공종"></textarea>
+      </div>
+      <div class="print-field" data-label="위치">
+        <textarea class="field location" rows="3" placeholder="예: 지하주차장 B1 기둥 A-3"></textarea>
+      </div>
+      <div class="print-field" data-label="내용">
+        <textarea class="field description" rows="3" placeholder="예: 균열 보수 전 상태"></textarea>
+      </div>
+      <div class="print-field" data-label="일자">
+        <input class="field taken-date" type="date" />
+      </div>
+      <div class="row-actions">
+        <button class="move-up" type="button" title="위로">위</button>
+        <button class="move-down" type="button" title="아래로">아래</button>
+        <button class="delete-row danger" type="button">삭제</button>
+      </div>
+    </article>
+  </template>
+
+  <script src="photo-ledger.js"></script>
+</body>
+</html>
+
+
+
+
+
