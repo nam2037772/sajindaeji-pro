@@ -36,7 +36,6 @@
     clearBtn: document.getElementById("clearBtn"),
     printBtn: document.getElementById("printBtn"),
     printPreview: document.getElementById("printPreview"),
-    exportCsvBtn: document.getElementById("exportCsvBtn"),
     exportJsonBtn: document.getElementById("exportJsonBtn"),
     saveAsJsonBtn: document.getElementById("saveAsJsonBtn")
   };
@@ -91,14 +90,6 @@
     state.meta.authorName = els.authorName.value.trim();
     state.meta.projectMemo = els.projectMemo.value.trim();
     saveSoon();
-  }
-
-  function escapeCsv(value) {
-    const text = String(value || "");
-    if (/[",\n]/.test(text)) {
-      return `"${text.replace(/"/g, '""')}"`;
-    }
-    return text;
   }
 
   function escapeHtml(value) {
@@ -340,19 +331,6 @@
       .join("");
   }
 
-  function exportCsv() {
-    const header = ["번호", "위치", "내용", "촬영일", "비고"];
-    const rows = state.items.map((item, index) => [
-      index + 1,
-      item.location,
-      item.description,
-      item.takenDate,
-      item.memo
-    ]);
-    const csv = [header, ...rows].map((row) => row.map(escapeCsv).join(",")).join("\n");
-    download(`사진대장-${state.meta.reportDate || today}.csv`, `\uFEFF${csv}`, "text/csv;charset=utf-8");
-  }
-
   function exportJson() {
     const content = JSON.stringify(state, null, 2);
     download(`사진대장-백업-${state.meta.reportDate || today}.json`, content, "application/json;charset=utf-8");
@@ -418,7 +396,6 @@
       document.title = originalTitle;
     }, 1000);
   });
-  els.exportCsvBtn.addEventListener("click", exportCsv);
   els.exportJsonBtn.addEventListener("click", exportJson);
   els.saveAsJsonBtn.addEventListener("click", exportJsonSaveAs);
 

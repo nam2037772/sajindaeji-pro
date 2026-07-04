@@ -13,10 +13,9 @@
       <h1>사진대장</h1>
     </div>
     <div class="header-actions">
-      <button id="printBtn" type="button">PDF 인쇄/저장</button>
-      <button id="exportCsvBtn" type="button">CSV</button>
+      <button id="printBtn" type="button">인쇄</button>
       <button id="exportJsonBtn" type="button">저장</button>
-      <button id="saveAsJsonBtn" type="button">다른이름으로 저장</button>
+      <button id="saveAsJsonBtn" type="button">다른 이름으로 저장</button>
       <label class="file-button">
         불러오기
         <input id="importJsonInput" type="file" accept=".json,application/json" />
@@ -46,12 +45,12 @@
 
     <section class="upload-panel" aria-label="사진 추가">
       <div>
-        <h2>사진 추가</h2>
-        <p>여러 장을 한 번에 올려도 됩니다. 올린 뒤 위치와 내용을 적으면 엑셀 사진대장처럼 정리됩니다.</p>
+        <h2>사진 업로드</h2>
+        <p>사진 파일을 선택하거나 끌어다 놓아 바로 추가하세요.</p>
       </div>
       <label class="upload-box" id="dropZone">
         <span>사진 선택 또는 끌어놓기</span>
-        <small>JPG, PNG, WebP</small>
+        <small>JPG, PNG, WebP 지원</small>
         <input id="photoInput" type="file" accept="image/*" multiple />
       </label>
     </section>
@@ -82,7 +81,7 @@
       <div id="ledgerList" class="ledger-list"></div>
       <div id="emptyState" class="empty-state">
         <strong>아직 사진이 없습니다.</strong>
-        <span>위의 사진 추가 버튼으로 첫 사진을 올려보세요.</span>
+        <span>위의 업로드 영역에서 첫 사진을 추가해 보세요.</span>
       </div>
     </section>
   </main>

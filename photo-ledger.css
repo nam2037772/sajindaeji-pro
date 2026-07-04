@@ -37,6 +37,7 @@ button,
   background: var(--paper);
   color: var(--text);
   cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, background 0.2s ease;
 }
 
 button,
@@ -47,8 +48,11 @@ button,
 }
 
 button:hover,
-.file-button:hover {
+.file-button:hover,
+.upload-box:hover {
   border-color: var(--brand);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 16px rgba(15, 34, 30, 0.08);
 }
 
 .danger {
@@ -173,7 +177,7 @@ textarea:focus {
   gap: 18px;
   align-items: center;
   margin-top: 14px;
-  padding: 18px;
+  padding: 20px 18px;
 }
 
 .upload-panel p {
@@ -184,7 +188,8 @@ textarea:focus {
 .upload-box {
   display: grid;
   place-items: center;
-  min-height: 112px;
+  min-height: 124px;
+  padding: 16px;
   border: 2px dashed #b8c9c4;
   background: #f8fbfa;
   text-align: center;
@@ -266,6 +271,10 @@ textarea:focus {
   border-top: 1px solid var(--line);
 }
 
+.ledger-row:hover {
+  background: #fbfdfc;
+}
+
 .row-number {
   display: grid;
   place-items: center;
@@ -322,8 +331,9 @@ textarea:focus {
 .empty-state {
   display: grid;
   place-items: center;
-  gap: 4px;
+  gap: 6px;
   min-height: 180px;
+  padding: 24px 16px;
   border-top: 1px solid var(--line);
   color: var(--muted);
   text-align: center;
