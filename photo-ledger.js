@@ -38,8 +38,15 @@
     exportPdfBtn: document.getElementById("exportPdfBtn"),
     printPreview: document.getElementById("printPreview"),
     exportJsonBtn: document.getElementById("exportJsonBtn"),
-    saveAsJsonBtn: document.getElementById("saveAsJsonBtn")
+    saveAsJsonBtn: document.getElementById("saveAsJsonBtn"),
+    inAppWarning: document.getElementById("inAppWarning"),
+    dismissInAppWarning: document.getElementById("dismissInAppWarning")
   };
+
+  function isInAppBrowser() {
+    const ua = navigator.userAgent || "";
+    return /KAKAOTALK|Instagram|FBAN|FBAV|Line\/|NAVER\(|inapp/i.test(ua);
+  }
 
   function uid() {
     return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -135,6 +142,12 @@
       }
     }
     download(defaultName, blob, blob.type);
+    if (blob.type === "application/pdf") {
+      // Mobile browsers (especially in-app webviews like KakaoTalk/Instagram) can
+      // silently swallow the download above with no error. Also open the PDF in a
+      // new tab so there's always something visible the user can view/share/save.
+      window.open(URL.createObjectURL(blob), "_blank");
+    }
   }
 
   function waitForPaint() {
@@ -577,6 +590,13 @@
   });
 
   els.dropZone.addEventListener("drop", (event) => addFiles(event.dataTransfer.files));
+
+  if (isInAppBrowser()) {
+    els.inAppWarning.hidden = false;
+  }
+  els.dismissInAppWarning.addEventListener("click", () => {
+    els.inAppWarning.hidden = true;
+  });
 
   load();
   syncMetaToForm();
