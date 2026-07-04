@@ -348,6 +348,165 @@ textarea:focus {
   display: none;
 }
 
+.print-preview.pdf-render {
+  display: block;
+  position: fixed;
+  top: 0;
+  left: -99999px;
+  width: 210mm;
+  background: #fff;
+}
+
+.print-page {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 4.5mm;
+  width: 210mm;
+  height: 277mm;
+  margin: 0 0 6mm;
+  padding: 14mm 5%;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.photo-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 2.4mm;
+  border: 0.2mm solid #1f1f1f;
+  border-radius: 1.8mm;
+  background: #fff;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.photo-card--empty {
+  color: #777;
+}
+
+.photo-frame {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  min-height: 88mm;
+  margin-bottom: 2.4mm;
+  overflow: hidden;
+  border: 0.1mm solid #e5e5e5;
+  border-radius: 1.2mm;
+  background: #f7f8f8;
+  position: relative;
+}
+
+.photo-frame img {
+  width: 90%;
+  height: 90%;
+  object-fit: contain;
+  display: block;
+  margin: auto;
+}
+
+.photo-placeholder {
+  padding: 6mm;
+  text-align: center;
+  font-size: 11pt;
+  color: #777;
+}
+
+.photo-meta {
+  padding: 0;
+  font-size: 11.5pt;
+  line-height: 1.22;
+  color: #222;
+  word-break: break-word;
+}
+
+.photo-meta-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.photo-meta-table th,
+.photo-meta-table td {
+  padding: 1.4mm 1.2mm;
+  border: 0.45mm solid #888;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.photo-meta-table th {
+  width: 15mm;
+  min-width: 15mm;
+  font-weight: 700;
+  background: #f5f5f5;
+}
+
+.photo-meta-table td {
+  width: 42mm;
+  min-width: 42mm;
+  background: #fff;
+}
+
+.pdf-cover {
+  box-sizing: border-box;
+  width: 210mm;
+  height: 297mm;
+  padding: 60mm 28mm;
+  background: #fff;
+  color: var(--text);
+  font-family: "Segoe UI", "Noto Sans KR", system-ui, sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 14mm;
+}
+
+.pdf-cover__eyebrow {
+  margin: 0;
+  color: var(--brand);
+  font-size: 13pt;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.pdf-cover__title {
+  margin: 0;
+  font-size: 30pt;
+  font-weight: 900;
+  color: var(--brand-strong);
+  border-bottom: 0.6mm solid var(--brand);
+  padding-bottom: 8mm;
+}
+
+.pdf-cover__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13pt;
+}
+
+.pdf-cover__table th,
+.pdf-cover__table td {
+  padding: 5mm 4mm;
+  border: 0.3mm solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.pdf-cover__table th {
+  width: 40mm;
+  background: #eaf1ef;
+  color: var(--brand-strong);
+  font-weight: 800;
+}
+
+.pdf-cover__generated {
+  margin-top: auto;
+  color: var(--muted);
+  font-size: 10pt;
+}
+
 @media (max-width: 980px) {
   .app-header {
     align-items: flex-start;
@@ -450,14 +609,7 @@ textarea:focus {
   }
 
   .print-page {
-    display: grid;
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr 1fr;
-    gap: 4.5mm;
     width: 100%;
-    height: 277mm;
-    margin: 0 0 6mm;
-    padding: 14mm 5%;
     page-break-after: always;
     break-after: page;
   }
@@ -466,85 +618,6 @@ textarea:focus {
     margin-bottom: 0;
     page-break-after: auto;
     break-after: auto;
-  }
-
-  .photo-card {
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    padding: 2.4mm;
-    border: 0.2mm solid #1f1f1f;
-    border-radius: 1.8mm;
-    background: #fff;
-    overflow: hidden;
-  }
-
-  .photo-card--empty {
-    color: #777;
-  }
-
-  .photo-frame {
-    flex: 1;
-    display: grid;
-    place-items: center;
-    min-height: 0;
-    margin-bottom: 2.4mm;
-    overflow: hidden;
-    border: 0.1mm solid #e5e5e5;
-    border-radius: 1.2mm;
-    background: #f7f8f8;
-    position: relative;
-    min-height: 88mm;
-  }
-
-  .photo-frame img {
-    width: 90%;
-    height: 90%;
-    object-fit: contain;
-    display: block;
-    margin: auto;
-  }
-
-  .photo-placeholder {
-    padding: 6mm;
-    text-align: center;
-    font-size: 11pt;
-    color: #777;
-  }
-
-  .photo-meta {
-    padding: 0;
-    font-size: 11.5pt;
-    line-height: 1.22;
-    color: #222;
-    word-break: break-word;
-  }
-
-  .photo-meta-table {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-  }
-
-  .photo-meta-table th,
-  .photo-meta-table td {
-    padding: 1.4mm 1.2mm;
-    border: 0.45mm solid #888;
-    text-align: left;
-    vertical-align: middle;
-  }
-
-  .photo-meta-table th {
-    width: 15mm;
-    min-width: 15mm;
-    font-weight: 700;
-    background: #f5f5f5;
-  }
-
-  .photo-meta-table td {
-    width: 42mm;
-    min-width: 42mm;
-    background: #fff;
   }
 }
 

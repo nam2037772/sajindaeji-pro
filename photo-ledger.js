@@ -35,6 +35,7 @@
     addBlankBtn: document.getElementById("addBlankBtn"),
     clearBtn: document.getElementById("clearBtn"),
     printBtn: document.getElementById("printBtn"),
+    exportPdfBtn: document.getElementById("exportPdfBtn"),
     printPreview: document.getElementById("printPreview"),
     exportJsonBtn: document.getElementById("exportJsonBtn"),
     saveAsJsonBtn: document.getElementById("saveAsJsonBtn")
@@ -111,6 +112,124 @@
     link.click();
     link.remove();
     URL.revokeObjectURL(url);
+  }
+
+  function sanitizeFileName(name) {
+    return String(name).replace(/[\\/:*?"<>|]/g, "_");
+  }
+
+  async function saveBlobAs(blob, defaultName, { description, mime, extension }) {
+    if (window.showSaveFilePicker) {
+      try {
+        const fileHandle = await window.showSaveFilePicker({
+          suggestedName: defaultName,
+          types: [{ description, accept: { [mime]: [extension] } }]
+        });
+        const writable = await fileHandle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+        return;
+      } catch (err) {
+        if (err.name === "AbortError") return;
+        console.warn("파일 선택 저장에 실패해 기본 다운로드로 대체합니다.", err);
+      }
+    }
+    download(defaultName, blob, blob.type);
+  }
+
+  function waitForPaint() {
+    return new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  }
+
+  function buildCoverElement() {
+    const cover = document.createElement("div");
+    cover.className = "pdf-cover";
+    const rows = [
+      ["현장명", state.meta.projectName || "-"],
+      ["작성일", state.meta.reportDate || today],
+      ["작성자", state.meta.authorName || "-"],
+      ["비고", state.meta.projectMemo || "-"],
+      ["총 사진 수", `${state.items.length}장`]
+    ];
+    cover.innerHTML = `
+      <p class="pdf-cover__eyebrow">Photo Ledger</p>
+      <h1 class="pdf-cover__title">사진대장</h1>
+      <table class="pdf-cover__table">
+        <tbody>
+          ${rows.map(([label, value]) => `<tr><th>${escapeHtml(label)}</th><td>${escapeHtml(value)}</td></tr>`).join("")}
+        </tbody>
+      </table>
+      <p class="pdf-cover__generated">생성일시: ${escapeHtml(new Date().toLocaleString("ko-KR"))}</p>
+    `;
+    return cover;
+  }
+
+  async function exportPdf() {
+    if (!window.jspdf || !window.html2canvas) {
+      alert("PDF 생성 라이브러리를 불러오지 못했습니다. 페이지를 새로고침한 뒤 다시 시도하세요.");
+      return;
+    }
+
+    exportPdfBtnBusy(true);
+    const offscreen = document.createElement("div");
+    offscreen.style.position = "fixed";
+    offscreen.style.top = "0";
+    offscreen.style.left = "-99999px";
+    offscreen.style.background = "#fff";
+    document.body.appendChild(offscreen);
+
+    try {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: "mm", format: "a4", compress: true });
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+
+      const cover = buildCoverElement();
+      offscreen.appendChild(cover);
+      await waitForPaint();
+      const coverCanvas = await window.html2canvas(cover, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
+      doc.addImage(coverCanvas.toDataURL("image/jpeg", 0.92), "JPEG", 0, 0, pageWidth, pageHeight);
+      cover.remove();
+
+      buildPrintPreview();
+      els.printPreview.classList.add("pdf-render");
+      const pages = Array.from(els.printPreview.querySelectorAll(".print-page"));
+      await waitForPaint();
+
+      for (let i = 0; i < pages.length; i++) {
+        const canvas = await window.html2canvas(pages[i], { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
+        doc.addPage("a4", "portrait");
+        doc.addImage(canvas.toDataURL("image/jpeg", 0.92), "JPEG", 0, 0, pageWidth, pageHeight);
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(9);
+        doc.setTextColor(120);
+        doc.text(`${i + 1} / ${pages.length}`, pageWidth / 2, pageHeight - 6, { align: "center" });
+      }
+
+      els.printPreview.classList.remove("pdf-render");
+
+      const fileBase = sanitizeFileName(
+        `사진대장-${state.meta.projectName ? state.meta.projectName + "-" : ""}${state.meta.reportDate || today}`
+      );
+      const blob = doc.output("blob");
+      await saveBlobAs(blob, `${fileBase}.pdf`, {
+        description: "PDF 파일",
+        mime: "application/pdf",
+        extension: ".pdf"
+      });
+    } catch (error) {
+      console.error(error);
+      alert("PDF 생성에 실패했습니다: " + error.message);
+    } finally {
+      els.printPreview.classList.remove("pdf-render");
+      offscreen.remove();
+      exportPdfBtnBusy(false);
+    }
+  }
+
+  function exportPdfBtnBusy(isBusy) {
+    els.exportPdfBtn.disabled = isBusy;
+    els.exportPdfBtn.textContent = isBusy ? "PDF 생성 중..." : "PDF 저장";
   }
 
   function fileToImageData(file) {
@@ -396,6 +515,7 @@
       document.title = originalTitle;
     }, 1000);
   });
+  els.exportPdfBtn.addEventListener("click", exportPdf);
   els.exportJsonBtn.addEventListener("click", exportJson);
   els.saveAsJsonBtn.addEventListener("click", exportJsonSaveAs);
 
