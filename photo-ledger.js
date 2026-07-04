@@ -103,7 +103,7 @@
   }
 
   function download(filename, content, type) {
-    const blob = new Blob([content], { type });
+    const blob = content instanceof Blob ? content : new Blob([content], { type });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
@@ -138,18 +138,36 @@
   }
 
   function waitForPaint() {
-    return new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    // Uses setTimeout rather than requestAnimationFrame: rAF can be suspended
+    // indefinitely on a backgrounded/hidden tab, which would hang PDF export
+    // if the user switches away while a multi-photo export is running.
+    return new Promise((resolve) => setTimeout(resolve, 50));
   }
 
-  function buildCoverElement() {
+  function waitForImages(container) {
+    const imgs = Array.from(container.querySelectorAll("img"));
+    return Promise.all(
+      imgs.map((img) => {
+        if (img.complete && img.naturalWidth) return Promise.resolve();
+        if (img.decode) return img.decode().catch(() => {});
+        return new Promise((resolve) => {
+          img.addEventListener("load", resolve, { once: true });
+          img.addEventListener("error", resolve, { once: true });
+        });
+      })
+    );
+  }
+
+  function buildCoverElement(snapshot) {
     const cover = document.createElement("div");
     cover.className = "pdf-cover";
+    const photoCount = snapshot.items.filter((item) => item.image).length;
     const rows = [
-      ["현장명", state.meta.projectName || "-"],
-      ["작성일", state.meta.reportDate || today],
-      ["작성자", state.meta.authorName || "-"],
-      ["비고", state.meta.projectMemo || "-"],
-      ["총 사진 수", `${state.items.length}장`]
+      ["현장명", snapshot.meta.projectName || "-"],
+      ["작성일", snapshot.meta.reportDate || today],
+      ["작성자", snapshot.meta.authorName || "-"],
+      ["비고", snapshot.meta.projectMemo || "-"],
+      ["총 사진 수", `${photoCount}장`]
     ];
     cover.innerHTML = `
       <p class="pdf-cover__eyebrow">Photo Ledger</p>
@@ -171,6 +189,14 @@
     }
 
     exportPdfBtnBusy(true);
+
+    // Snapshot state so edits made while the PDF is being generated (which can take a
+    // few seconds for many photos) can't mutate the pages mid-capture.
+    const snapshot = {
+      meta: { ...state.meta },
+      items: state.items.map((item) => ({ ...item }))
+    };
+
     const offscreen = document.createElement("div");
     offscreen.style.position = "fixed";
     offscreen.style.top = "0";
@@ -183,33 +209,37 @@
       const doc = new jsPDF({ unit: "mm", format: "a4", compress: true });
       const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
+      const bodyHeight = 277; // matches .print-page CSS height, keeps capture aspect ratio intact
+      const bodyTop = (pageHeight - bodyHeight) / 2;
 
-      const cover = buildCoverElement();
+      const cover = buildCoverElement(snapshot);
       offscreen.appendChild(cover);
       await waitForPaint();
       const coverCanvas = await window.html2canvas(cover, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
-      doc.addImage(coverCanvas.toDataURL("image/jpeg", 0.92), "JPEG", 0, 0, pageWidth, pageHeight);
+      doc.addImage(coverCanvas, "JPEG", 0, 0, pageWidth, pageHeight);
       cover.remove();
 
-      buildPrintPreview();
-      els.printPreview.classList.add("pdf-render");
-      const pages = Array.from(els.printPreview.querySelectorAll(".print-page"));
+      // Built in our own offscreen container (not the shared #printPreview) so this
+      // is unaffected by render() calls the user can trigger while this is running.
+      const ledgerContainer = document.createElement("div");
+      ledgerContainer.innerHTML = buildLedgerPagesMarkup(snapshot.items);
+      offscreen.appendChild(ledgerContainer);
+      await waitForImages(ledgerContainer);
       await waitForPaint();
 
+      const pages = Array.from(ledgerContainer.querySelectorAll(".print-page"));
       for (let i = 0; i < pages.length; i++) {
         const canvas = await window.html2canvas(pages[i], { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
         doc.addPage("a4", "portrait");
-        doc.addImage(canvas.toDataURL("image/jpeg", 0.92), "JPEG", 0, 0, pageWidth, pageHeight);
+        doc.addImage(canvas, "JPEG", 0, bodyTop, pageWidth, bodyHeight);
         doc.setFont("helvetica", "normal");
         doc.setFontSize(9);
         doc.setTextColor(120);
         doc.text(`${i + 1} / ${pages.length}`, pageWidth / 2, pageHeight - 6, { align: "center" });
       }
 
-      els.printPreview.classList.remove("pdf-render");
-
       const fileBase = sanitizeFileName(
-        `사진대장-${state.meta.projectName ? state.meta.projectName + "-" : ""}${state.meta.reportDate || today}`
+        `사진대장-${snapshot.meta.projectName ? snapshot.meta.projectName + "-" : ""}${snapshot.meta.reportDate || today}`
       );
       const blob = doc.output("blob");
       await saveBlobAs(blob, `${fileBase}.pdf`, {
@@ -221,7 +251,6 @@
       console.error(error);
       alert("PDF 생성에 실패했습니다: " + error.message);
     } finally {
-      els.printPreview.classList.remove("pdf-render");
       offscreen.remove();
       exportPdfBtnBusy(false);
     }
@@ -371,8 +400,7 @@
     });
   }
 
-  function buildPrintPreview() {
-    const items = state.items;
+  function buildLedgerPagesMarkup(items) {
     const pairs = [];
 
     for (let index = 0; index < items.length; index += 2) {
@@ -381,7 +409,7 @@
     }
 
     if (!pairs.length) {
-      els.printPreview.innerHTML = `
+      return `
         <section class="print-page">
           <article class="photo-card photo-card--empty">
             <div class="photo-frame">
@@ -401,10 +429,9 @@
           </article>
         </section>
       `;
-      return;
     }
 
-    els.printPreview.innerHTML = pairs
+    return pairs
       .map((pair) => `
         <section class="print-page">
           ${pair
@@ -448,6 +475,10 @@
         </section>
       `)
       .join("");
+  }
+
+  function buildPrintPreview() {
+    els.printPreview.innerHTML = buildLedgerPagesMarkup(state.items);
   }
 
   function exportJson() {
