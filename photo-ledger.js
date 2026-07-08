@@ -1,4 +1,4 @@
-﻿(function () {
+(function () {
   const STORAGE_KEY = "photo-ledger-v1";
   function formatLocalDate(date) {
     const year = date.getFullYear();
@@ -570,8 +570,22 @@
 
   els.clearBtn.addEventListener("click", () => {
     if (!confirm("사진대장을 전부 비울까요? 백업하지 않은 사진과 내용은 사라집니다.")) return;
+
+    state.meta = {
+      projectName: "",
+      reportDate: today,
+      authorName: "",
+      projectMemo: ""
+    };
     state.items = [];
-    save();
+
+    localStorage.removeItem(STORAGE_KEY);
+    els.photoInput.value = "";
+    els.importJsonInput.value = "";
+    els.searchInput.value = "";
+    els.printPreview.innerHTML = "";
+
+    syncMetaToForm();
     render();
   });
 

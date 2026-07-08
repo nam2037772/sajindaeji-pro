@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>사진대장</title>
+  <title>사진대지</title>
   <link rel="icon" href="assets/favicon.ico" />
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
   <link rel="manifest" href="manifest.json" />
@@ -14,12 +14,12 @@
   <header class="app-header">
     <div>
       <p class="eyebrow">Photo Ledger</p>
-      <h1>사진대장</h1>
+      <h1>사진대지</h1>
     </div>
     <div class="header-actions">
       <button id="printBtn" type="button">인쇄</button>
       <button id="exportPdfBtn" type="button">PDF 저장</button>
-      <button id="exportJsonBtn" type="button">저장</button>
+      <button id="exportJsonBtn" type="button">백업</button>
       <button id="saveAsJsonBtn" type="button">다른 이름으로 저장</button>
       <label class="file-button">
         불러오기
@@ -29,7 +29,7 @@
   </header>
 
   <div id="inAppWarning" class="in-app-warning" hidden>
-    <span>카카오톡·인스타그램 등 인앱 브라우저에서는 PDF/파일 저장이 조용히 실패할 수 있어요. 오른쪽 위 메뉴에서 <strong>"다른 브라우저로 열기"</strong>를 눌러주세요.</span>
+    <span>카카오톡, 인스타그램 등 인앱 브라우저에서는 PDF/파일 저장이 실패할 수 있습니다. 메뉴에서 <strong>다른 브라우저로 열기</strong>를 눌러 주세요.</span>
     <button id="dismissInAppWarning" type="button">닫기</button>
   </div>
 
@@ -37,7 +37,7 @@
     <section class="panel project-panel" aria-label="대장 기본 정보">
       <label>
         현장명
-        <input id="projectName" type="text" placeholder="예: 오라동 현장" />
+        <input id="projectName" type="text" placeholder="예: 오라이 현장" />
       </label>
       <label>
         작성일
@@ -45,7 +45,7 @@
       </label>
       <label>
         작성자
-        <input id="authorName" type="text" placeholder="예: 에릭" />
+        <input id="authorName" type="text" placeholder="예: 홍길동" />
       </label>
       <label>
         비고
@@ -56,7 +56,7 @@
     <section class="upload-panel" aria-label="사진 추가">
       <div>
         <h2>사진 업로드</h2>
-        <p>사진 파일을 선택하거나 끌어다 놓아 바로 추가하세요.</p>
+        <p>사진 파일을 선택하거나 끌어 놓아 바로 추가하세요.</p>
       </div>
       <label class="upload-box" id="dropZone">
         <span>사진 선택 또는 끌어놓기</span>
@@ -113,7 +113,7 @@
         <textarea class="field location" rows="3" placeholder="예: 지하주차장 B1 기둥 A-3"></textarea>
       </div>
       <div class="print-field" data-label="내용">
-        <textarea class="field description" rows="3" placeholder="예: 균열 보수 전 상태"></textarea>
+        <textarea class="field description" rows="3" placeholder="예: 균열 보수 후 상태"></textarea>
       </div>
       <div class="print-field" data-label="일자">
         <input class="field taken-date" type="date" />
